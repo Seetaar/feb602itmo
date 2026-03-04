@@ -285,9 +285,9 @@ def plot_histogram(data):
     """
     plt.figure(figsize=(8, 6))
     plt.hist(data, bins=20, edgecolor='black', alpha=0.7)
-    plt.title('Распределение оценок')
+    plt.title('Распределение оценок по математике')
     plt.xlabel('Оценка')
-    plt.ylabel('Кол-во студентов')
+    plt.ylabel('Количество студентов')
     plt.grid(axis='y', alpha=0.5)
     plt.tight_layout()
     plt.savefig('plots/histogram.png', dpi=300)
@@ -325,9 +325,9 @@ def plot_line(x, y):
     """
     plt.figure(figsize=(10, 6))
     plt.plot(x, y, marker='o', linestyle='-', linewidth=1, markersize=4)
-    plt.title('Оценки по математике для каждого студента')
+    plt.title('Оценки студентов')
     plt.xlabel('Номер студента')
-    plt.ylabel('Оценка')
+    plt.ylabel('Оценка ')
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.savefig('plots/line_plot.png', dpi=300)
