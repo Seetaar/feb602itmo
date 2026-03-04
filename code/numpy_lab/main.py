@@ -290,7 +290,7 @@ def plot_histogram(data):
     plt.ylabel('Количество студентов')
     plt.grid(axis='y', alpha=0.5)
     plt.tight_layout()
-    plt.savefig('plots/histogram.png', dpi=300)
+    plt.savefig('code/numpy_lab/plots/histogram.png', dpi=300)
     plt.close()
 
 
@@ -308,7 +308,7 @@ def plot_heatmap(matrix):
     sns.heatmap(matrix, annot=True, fmt='.2f', cmap='coolwarm', center=0)
     plt.title('Тепловая карта корреляции предметов')
     plt.tight_layout()
-    plt.savefig('plots/heatmap.png', dpi=300)
+    plt.savefig('code/numpy_lab/plots/heatmap.png', dpi=300)
     plt.close()
 
 
@@ -330,5 +330,5 @@ def plot_line(x, y):
     plt.ylabel('Оценка ')
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig('plots/line_plot.png', dpi=300)
+    plt.savefig('code/numpy_lab/plots/line_plot.png', dpi=300)
     plt.close()
