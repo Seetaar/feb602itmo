@@ -1,11 +1,22 @@
-import matplotlib
-matplotlib.use('Agg')
+"""
+LR-2 Модуль для работы с массивами NumPy и для визуализации данных.
 
+Включает функции для:
+- Создания и обработки массивов
+- Векторных операций
+- Матричных операций
+- Статистического анализа
+- Визуализации данных
+"""
 import os
+
 import numpy as np
 import pandas as pd
-import seaborn as sns
+import matplotlib
+
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 # ============================================================
@@ -15,9 +26,6 @@ import matplotlib.pyplot as plt
 def create_vector():
     """
     Создать массив от 0 до 9.
-
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.arange.html
 
     Returns:
         numpy.ndarray: Массив чисел от 0 до 9 включительно
@@ -29,9 +37,6 @@ def create_matrix():
     """
     Создать матрицу 5x5 со случайными числами [0,1].
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/random/generated/numpy.random.rand.html
-
     Returns:
         numpy.ndarray: Матрица 5x5 со случайными значениями от 0 до 1
     """
@@ -41,9 +46,6 @@ def create_matrix():
 def reshape_vector(vec):
     """
     Преобразовать (10,) -> (2,5)
-
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.reshape.html
 
     Args:
         vec (numpy.ndarray): Входной массив формы (10,)
@@ -57,9 +59,6 @@ def reshape_vector(vec):
 def transpose_matrix(mat):
     """
     Транспонирование матрицы.
-
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.transpose.html
 
     Args:
         mat (numpy.ndarray): Входная матрица
@@ -121,9 +120,6 @@ def dot_product(a, b):
     """
     Скалярное произведение.
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.dot.html
-
     Args:
         a (numpy.ndarray): Первый вектор
         b (numpy.ndarray): Второй вектор
@@ -142,9 +138,6 @@ def matrix_multiply(a, b):
     """
     Умножение матриц.
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.matmul.html
-
     Args:
         a (numpy.ndarray): Первая матрица
         b (numpy.ndarray): Вторая матрица
@@ -159,9 +152,6 @@ def matrix_determinant(a):
     """
     Определитель матрицы.
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.linalg.det.html
-
     Args:
         a (numpy.ndarray): Квадратная матрица
 
@@ -170,12 +160,10 @@ def matrix_determinant(a):
     """
     return np.linalg.det(a)
 
+
 def matrix_inverse(a):
     """
     Обратная матрица.
-
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.linalg.inv.html
 
     Args:
         a (numpy.ndarray): Квадратная матрица
@@ -185,12 +173,10 @@ def matrix_inverse(a):
     """
     return np.linalg.inv(a)
 
+
 def solve_linear_system(a, b):
     """
     Решить систему Ax = b
-
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html
 
     Args:
         a (numpy.ndarray): Матрица коэффициентов A
@@ -218,6 +204,7 @@ def load_dataset(path="data/students_scores.csv"):
     """
     return pd.read_csv(path).to_numpy()
 
+
 def statistical_analysis(data):
     """
     Представьте, что данные — это результаты экзамена по математике.
@@ -228,12 +215,6 @@ def statistical_analysis(data):
     - минимум
     - максимум
     - 25 и 75 перцентили
-
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.mean.html
-    https://numpy.org/doc/stable/reference/generated/numpy.median.html
-    https://numpy.org/doc/stable/reference/generated/numpy.std.html
-    https://numpy.org/doc/stable/reference/generated/numpy.percentile.html
 
     Args:
         data (numpy.ndarray): Одномерный массив данных
@@ -277,9 +258,6 @@ def plot_histogram(data):
     """
     Построить гистограмму распределения оценок по математике.
 
-    Изучить:
-    https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html
-
     Args:
         data (numpy.ndarray): Данные для гистограммы
     """
@@ -298,9 +276,6 @@ def plot_heatmap(matrix):
     """
     Построить тепловую карту корреляции предметов.
 
-    Изучить:
-    https://seaborn.pydata.org/generated/seaborn.heatmap.html
-
     Args:
         matrix (numpy.ndarray): Матрица корреляции
     """
@@ -315,9 +290,6 @@ def plot_heatmap(matrix):
 def plot_line(x, y):
     """
     Построить график зависимости: студент -> оценка по математике.
-
-    Изучить:
-    https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
 
     Args:
         x (numpy.ndarray): Номера студентов
