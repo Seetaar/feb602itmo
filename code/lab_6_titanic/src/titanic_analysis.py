@@ -5,12 +5,12 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 import matplotlib
+import self
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Настройка отображения
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 1000)
 warnings.filterwarnings('ignore')
@@ -94,7 +94,7 @@ class TitanicDataProcessor:
         )
         axes[0, 0].set_title('1. Пол и Выживаемость', fontsize=12, fontweight='bold')
         axes[0, 0].set_xlabel('Пол пассажира')
-        axes[0, 0].set_ylabel('Количество людей')
+        axes[0, 0].set_ylabel('Кол-во людей')
         axes[0, 0].legend(title='Статус')
 
         pclass_col = 'Pclass_str' if 'Pclass_str' in df.columns else 'Pclass'
@@ -102,11 +102,11 @@ class TitanicDataProcessor:
         class_counts = df.groupby([pclass_col, 'Status']).size().unstack(fill_value=0)
         class_counts.plot(
             kind='bar', stacked=True, ax=axes[0, 1],
-            color=[colors['Погиб'], colors['Выжил']]
+            color=[colors['Выжил'], colors['Погиб']]
         )
         axes[0, 1].set_title('2. Класс билета и Выживаемость', fontsize=12, fontweight='bold')
         axes[0, 1].set_xlabel('Класс билета')
-        axes[0, 1].set_ylabel('Количество пассажиров')
+        axes[0, 1].set_ylabel('Кол-во пассажиров')
         axes[0, 1].tick_params(axis='x', rotation=0)
         axes[0, 1].legend(title='Статус', loc='upper right')
 
@@ -137,7 +137,7 @@ class TitanicDataProcessor:
 
     def handle_missing_values(self):
         """Обработка пропусков значений в столбцах Age, Embarked, Cabin."""
-        print("№2: ОБРАБОТКА ПРОПУСКОВ")
+        print("№2: Обработка пропусков")
 
         if 'Age' in self.df.columns:
             age_median = self.df['Age'].median()
@@ -185,7 +185,7 @@ class TitanicDataProcessor:
         Создать признак FamilySize = SibSp + Parch + 1
         Создать признак IsAlone (1 если FamilySize = 1, иначе 0)
         """
-        print("№3: ПРЕОБРАЗОВАНИЕ ПРИЗНАКОВ")
+        print("№3: Преобразование признаков")
 
         if 'Pclass' in self.df.columns:
             pclass_mapping = {1: 'F', 2: 'S', 3: 'T'}  # First, Second, Third
@@ -223,80 +223,78 @@ class TitanicDataProcessor:
     def handle_outliers(self, fare_winsor_percentile: float = 0.95,
                         age_winsor_percentile: float = 0.95):
         """
-        Обрабатывает выбросы с помощью IQR-метода
-
-        fare_winsor_percentile : float
-            Перцентиль для ограничения значений Fare (по умолчанию 0.95)
-        age_winsor_percentile : float
-            Перцентиль для ограничения значений Age (по умолчанию 0.95)
+        Обрабатывает выбросы с помощью IQR-метода и winsorization.
         """
-        print("№4: ОБРАБОТКА ВЫБРОСОВ")
+        print("№4: Обработка выбросов")
+
+        COLOR_BAR = '#D5D8DC'
+        COLOR_LINE = '#566573'
+        COLOR_MEDIAN = '#922B21'
 
         if 'Fare' in self.df.columns:
-            print(f"\nАнализ столбца 'Fare':")
+            print("Анализ столбца 'Fare':")
 
             Q1 = self.df['Fare'].quantile(0.25)
             Q3 = self.df['Fare'].quantile(0.75)
             IQR = Q3 - Q1
-            lower_bound = Q1 - 1.5 * IQR
             upper_bound_iqr = Q3 + 1.5 * IQR
+            upper_bound_95 = self.df['Fare'].quantile(fare_winsor_percentile)
 
-            upper_bound_95 = self.df['Fare'].quantile(0.95)
+            print(f"Граница выбросов (IQR): {upper_bound_iqr:.2f} £")
+            print(f"{int(fare_winsor_percentile * 100)}-й перцентиль: {upper_bound_95:.2f} £")
 
-            print(f"   • IQR = {IQR:.2f}")
-            print(f"   • Граница выбросов (IQR): {upper_bound_iqr:.2f}")
-            print(f"   • 95-й перцентиль (для обрезки): {upper_bound_95:.2f}")
+            # Копия для seaborn
+            df_fare = self.df.copy()
+            df_fare['log_fare'] = np.log1p(df_fare['Fare'])
 
             fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
-            axes[0].boxplot(
-                self.df['Fare'].dropna(),
-                vert=True,
-                patch_artist=True,
-                boxprops=dict(facecolor='steelblue', edgecolor='black', linewidth=1.5),
-                medianprops=dict(color='red', linewidth=2.5),
-                meanprops=dict(marker='D', markerfacecolor='green',
-                               markeredgecolor='black', markersize=8),
-                flierprops=dict(marker='o', markerfacecolor='crimson',
-                                markeredgecolor='black', markersize=5, alpha=0.6),
-                showmeans=True
-            )
-            axes[0].set_title('Boxplot: Fare\n(формальные выбросы по IQR)', fontsize=11, fontweight='bold')
-            axes[0].set_ylabel('Стоимость билета (£)', fontsize=10)
-            axes[0].tick_params(axis='x', labelbottom=False)  # Убираем метку "1" внизу
+            #Гистограмма 1
+            axes[0].boxplot(df_fare['Fare'].dropna(), vert=True, patch_artist=True,
+                            showmeans=True,
+                            boxprops=dict(facecolor=COLOR_BAR, edgecolor='#566573', linewidth=1.5),
+                            medianprops=dict(color=COLOR_MEDIAN, linewidth=2.5),
+                            meanprops=dict(marker='D', markerfacecolor='#2E86C1', markeredgecolor='black',
+                                           markersize=8),
+                            flierprops=dict(marker='o', markerfacecolor=COLOR_MEDIAN, markeredgecolor='black',
+                                            markersize=6, alpha=0.6))
+
+            axes[0].set_title('Коробчатая диаграмма: Стоимость билета\n(формальные выбросы по IQR)', fontsize=12,
+                              fontweight='bold', pad=12)
+            axes[0].set_ylabel('Стоимость билета (£)', fontsize=11)
+            axes[0].tick_params(axis='x', labelbottom=False)
             axes[0].grid(axis='y', alpha=0.3, linestyle='--')
 
-            # Добавляем подписи ключевых значений
-            axes[0].axhline(Q1, color='gray', linestyle=':', alpha=0.5)
-            axes[0].axhline(Q3, color='gray', linestyle=':', alpha=0.5)
-            axes[0].text(1.2, Q1, f'Q1={Q1:.1f}', fontsize=8, va='center')
-            axes[0].text(1.2, Q3, f'Q3={Q3:.1f}', fontsize=8, va='center')
-            axes[0].text(1.2, upper_bound_iqr, f'IQR-граница={upper_bound_iqr:.1f}',
-                         fontsize=8, va='center', color='red', fontweight='bold')
+            axes[0].axhline(Q1, color='gray', linestyle=':', alpha=0.4)
+            axes[0].axhline(Q3, color='gray', linestyle=':', alpha=0.4)
+            axes[0].text(1.08, Q1, f'Q1 = {Q1:.1f}', fontsize=9, va='center', ha='left', color='#555')
+            axes[0].text(1.08, Q3, f'Q3 = {Q3:.1f}', fontsize=9, va='center', ha='left', color='#555')
+            axes[0].text(1.08, upper_bound_iqr, f'IQR-граница = {upper_bound_iqr:.1f}',
+                         fontsize=9, va='center', ha='left', color=COLOR_MEDIAN, fontweight='bold')
+            axes[0].set_xlim(0.7, 1.4)
 
-            # ========================================================
-            # ГРАФИК 2: LOG-ГИСТОГРАММА — реальное распределение
-            # ========================================================
-            # log1p = log(x + 1) — позволяет работать с нулевыми значениями
-            fare_log = np.log1p(self.df['Fare'])
+            #Гистограмма 2
+            sns.histplot(data=df_fare, x='log_fare', bins=35, kde=True, stat='count',
+                         color=COLOR_BAR, edgecolor='black', alpha=0.8, linewidth=1.2,
+                         line_kws={'color': COLOR_LINE, 'linewidth': 2.5}, ax=axes[1])
 
-            axes[1].hist(fare_log, bins=40, edgecolor='black',
-                         color='lightcoral', alpha=0.8)
-            axes[1].axvline(np.log1p(upper_bound_95), color='darkred',
-                            linestyle='-', linewidth=2, label=f'95% перцентиль')
-            axes[1].axvline(np.log1p(upper_bound_iqr), color='red',
-                            linestyle='--', linewidth=1.5, label=f'IQR-граница')
-            axes[1].set_title('Распределение: log(Fare + 1)\n(нормализованный вид)',
-                              fontsize=11, fontweight='bold')
-            axes[1].set_xlabel('log(Стоимость + 1)', fontsize=10)
-            axes[1].set_ylabel('Частота', fontsize=10)
-            axes[1].legend(fontsize=9)
+            axes[1].axvline(np.log1p(upper_bound_iqr), color=COLOR_MEDIAN, linestyle='--', linewidth=2,
+                            label=f'IQR-граница ({upper_bound_iqr:.0f}£)')
+            axes[1].axvline(np.log1p(upper_bound_95), color=COLOR_LINE, linestyle='-', linewidth=2.5,
+                            label=f'{int(fare_winsor_percentile * 100)}% перцентиль ({upper_bound_95:.0f}£)')
+
+            axes[1].set_title('Распределение: log(Стоимость + 1)\n(сглаженный вид с KDE)', fontsize=12,
+                              fontweight='bold', pad=12)
+            axes[1].set_xlabel('log(Стоимость + 1)', fontsize=11)
+            axes[1].set_ylabel('Частота', fontsize=11)
+            axes[1].legend(fontsize=9, loc='upper right', framealpha=0.9)
             axes[1].grid(axis='y', alpha=0.3, linestyle='--')
 
-            # Подпись: как интерпретировать ось X
-            axes[1].text(0.5, 0.02,
-                         'Ось X: log(£+1) → 0=£0, 2.3=£9, 3.0=£19, 4.6=£99, 6.2=£499',
-                         fontsize=8, style='italic', ha='center', transform=axes[1].transAxes)
+            log_ticks = np.arange(0, 6.5, 1)
+            real_vals = np.expm1(log_ticks).astype(int)
+            axes[1].set_xticks(log_ticks)
+            axes[1].set_xticklabels([f'log={int(t)}\n({int(v)}£)' if t > 0 else '0\n(0£)'
+                                     for t, v in zip(log_ticks, real_vals)], fontsize=9, ha='center')
 
             plt.tight_layout()
             filepath = os.path.join(self.output_dir, 'fare_analysis.png')
@@ -304,9 +302,54 @@ class TitanicDataProcessor:
             print(f"   ✓ График сохранён: {filepath}")
             plt.close()
 
-            # Применяем Winsorization (обрезка по 95-му перцентилю)
             self.df['Fare_winsorized'] = self.df['Fare'].clip(upper=upper_bound_95)
-            print(f"   ✓ Winsorization: значения > £{upper_bound_95:.2f} заменены на {upper_bound_95:.2f}")
+            print(f"   ✓ Winsorization: значения > {upper_bound_95:.2f} £ обрезаны.")
+
+        #Визуал
+        if 'Age' in self.df.columns:
+            print(f"\n👤 Анализ столбца 'Age':")
+
+            fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+            data_age = self.df['Age'].dropna()
+
+            # Гистограмма
+            axes[0].hist(data_age, bins=30, edgecolor='black', alpha=0.7, color=COLOR_BAR)
+            median_age = data_age.median()
+            axes[0].axvline(median_age, color=COLOR_MEDIAN, linestyle='--', linewidth=2,
+                            label=f'Медиана: {median_age:.1f}')
+            axes[0].set_title('Распределение возраста', fontsize=12, fontweight='bold')
+            axes[0].set_xlabel('Возраст', fontsize=11)
+            axes[0].set_ylabel('Частота', fontsize=11)
+            axes[0].legend(fontsize=9)
+            axes[0].grid(axis='y', alpha=0.3, linestyle='--')
+
+            axes[1].boxplot(data_age, vert=True, patch_artist=True,
+                            boxprops=dict(facecolor=COLOR_BAR, edgecolor='#566573'),
+                            medianprops=dict(color=COLOR_MEDIAN, linewidth=2),
+                            showmeans=True,
+                            meanprops=dict(marker='D', markerfacecolor='#2E86C1', markersize=8))
+            axes[1].set_title('Коробчатая диаграмма: Возраст', fontsize=12, fontweight='bold')
+            axes[1].set_ylabel('Возраст (лет)', fontsize=11)
+            axes[1].tick_params(axis='x', labelbottom=False)  # Убираем цифру "1"
+            axes[1].grid(axis='y', alpha=0.3, linestyle='--')
+
+            plt.tight_layout()
+            filepath = os.path.join(self.output_dir, 'age_distribution.png')
+            plt.savefig(filepath, dpi=300, bbox_inches='tight')
+            print(f"   ✓ График сохранён: {filepath}")
+            plt.close()
+
+            age_cutoff = self.df['Age'].quantile(age_winsor_percentile)
+            self.df['Age_winsorized'] = self.df['Age'].clip(upper=age_cutoff)
+            print(
+                f"   ✓ Winsorization Age: значения > {age_winsor_percentile * 100}% перцентили ({age_cutoff:.1f} лет) заменены")
+
+        cols_to_drop = [col for col in self.df.columns if col.endswith('_outlier')]
+        if cols_to_drop:
+            self.df.drop(columns=cols_to_drop, inplace=True)
+
+        return self.df
 
     def aggregate_data(self):
         """
@@ -317,7 +360,7 @@ class TitanicDataProcessor:
         Создать сводную таблицу выживаемости по новым признакам
         Сохранить очищенные данные в новый CSV-файл
         """
-        print("№5: АГРЕГАЦИЯ ДАННЫХ")
+        print("№5: Агрегация данных")
 
         if all(col in self.df.columns for col in ['Pclass', 'Survived']):
             survival_by_class = self.df.groupby('Pclass')['Survived'].mean()
