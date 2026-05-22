@@ -40,7 +40,7 @@ class TitanicDataProcessor:
         Returns:
         pd.DataFrame
         """
-        print("№1: ПЕРВИЧНЫЙ АНАЛИЗ ДАННЫХ")
+        print("№1: Первичный анализ данных")
 
         self.df = pd.read_csv(self.filepath)
         print(f"Данные загружены: {self.df.shape[0]} строк, {self.df.shape[1]} столбцов")
@@ -299,15 +299,15 @@ class TitanicDataProcessor:
             plt.tight_layout()
             filepath = os.path.join(self.output_dir, 'fare_analysis.png')
             plt.savefig(filepath, dpi=300, bbox_inches='tight')
-            print(f"   ✓ График сохранён: {filepath}")
+            print(f"График сохранён: {filepath}")
             plt.close()
 
             self.df['Fare_winsorized'] = self.df['Fare'].clip(upper=upper_bound_95)
-            print(f"   ✓ Winsorization: значения > {upper_bound_95:.2f} £ обрезаны.")
+            print(f"Winsorization: значения > {upper_bound_95:.2f} £ обрезаны.")
 
         #Визуал
         if 'Age' in self.df.columns:
-            print(f"\n👤 Анализ столбца 'Age':")
+            print("Анализ столбца 'Age':")
 
             fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
@@ -337,13 +337,13 @@ class TitanicDataProcessor:
             plt.tight_layout()
             filepath = os.path.join(self.output_dir, 'age_distribution.png')
             plt.savefig(filepath, dpi=300, bbox_inches='tight')
-            print(f"   ✓ График сохранён: {filepath}")
+            print(f"График сохранён: {filepath}")
             plt.close()
 
             age_cutoff = self.df['Age'].quantile(age_winsor_percentile)
             self.df['Age_winsorized'] = self.df['Age'].clip(upper=age_cutoff)
             print(
-                f"   ✓ Winsorization Age: значения > {age_winsor_percentile * 100}% перцентили ({age_cutoff:.1f} лет) заменены")
+                f"Winsorization Age: значения > {age_winsor_percentile * 100}% перцентили ({age_cutoff:.1f} лет) заменены")
 
         cols_to_drop = [col for col in self.df.columns if col.endswith('_outlier')]
         if cols_to_drop:
